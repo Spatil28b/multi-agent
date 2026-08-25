@@ -4,8 +4,14 @@
 
 param(
     [Parameter(Mandatory=$true)]
-    [string]$Agent
+    [string]$Agent,
+    [switch]$NoPull
 )
+
+# Pull latest state first unless -NoPull is passed
+if (-not $NoPull) {
+    git pull --quiet 2>&1 | Out-Null
+}
 
 $taskFile = ".ai\task-board.yaml"
 
@@ -17,51 +23,90 @@ if (-not (Test-Path $taskFile)) {
 $content = Get-Content $taskFile -Raw
 $lines = Get-Content $taskFile
 
+$allTasks = @()
 $currentTask = $null
-$inTask = $false
-$taskId = ""
-$taskOwner = ""
-$taskStatus = ""
-$taskTitle = ""
-$taskDesc = ""
-$foundTasks = @()
 
 foreach ($line in $lines) {
-    if ($line -match "^\s{2}(TASK-\d+):") {
-        $currentTask = @{ id=$Matches[1]; owner=""; status=""; title=""; description="" }
-    }
-    if ($currentTask -and $line -match "^\s{4}title:\s*[`"']?(.+?)[`"']?\s*$") {
-        $currentTask.title = $Matches[1]
-    }
-    if ($currentTask -and $line -match "^\s{4}owner:\s*[`"']?(.+?)[`"']?\s*$") {
-        $currentTask.owner = $Matches[1]
-    }
-    if ($currentTask -and $line -match "^\s{4}status:\s*[`"']?(.+?)[`"']?\s*$") {
-        $currentTask.status = $Matches[1]
-        # When we get status, check if this task is for us
-        if ($currentTask.owner -eq $Agent -and $currentTask.status -eq "ready") {
-            $foundTasks += $currentTask
+    # Match any task header like "  TASK-001:" or "TASK-001:" or "  TASK_001:"
+    if ($line -match "^\s*(TASK[-_]\w+):") {
+        if ($currentTask) {
+            $allTasks += $currentTask
         }
-        $currentTask = $null
+        $currentTask = @{
+            id          = $Matches[1]
+            title       = "Untitled"
+            owner       = ""
+            status      = ""
+            description = ""
+        }
+        continue
+    }
+
+    if ($currentTask) {
+        if ($line -match "^\s*title:\s*[`"']?(.*?)['`"]?\s*$") {
+            $currentTask.title = $Matches[1].Trim()
+        }
+        elseif ($line -match "^\s*owner:\s*[`"']?(.*?)['`"]?\s*$") {
+            $currentTask.owner = $Matches[1].Trim().ToLower()
+        }
+        elseif ($line -match "^\s*status:\s*[`"']?(.*?)['`"]?\s*$") {
+            $currentTask.status = $Matches[1].Trim().ToLower()
+        }
+        elseif ($line -match "^\s*description:\s*[`"']?(.*?)['`"]?\s*$") {
+            $currentTask.description = $Matches[1].Trim()
+        }
+    }
+}
+
+# Add last task
+if ($currentTask) {
+    $allTasks += $currentTask
+}
+
+$targetAgent = $Agent.Trim().ToLower()
+$foundTasks = @()
+
+foreach ($t in $allTasks) {
+    $ownerMatches = ($t.owner -eq $targetAgent) -or ($targetAgent -eq "all")
+    $statusIsReady = ($t.status -eq "ready") -or ($t.status -eq "running") -or ($t.status -eq "in_progress") -or ($t.status -eq "todo")
+    
+    if ($ownerMatches -and $statusIsReady) {
+        $foundTasks += $t
     }
 }
 
 if ($foundTasks.Count -eq 0) {
-    Write-Host "[IDLE] No tasks assigned to '$Agent' with status 'ready'" -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "[IDLE] No active/ready tasks assigned to '$Agent'." -ForegroundColor Yellow
+    
+    if ($allTasks.Count -gt 0) {
+        Write-Host "Current tasks on board:" -ForegroundColor DarkGray
+        foreach ($t in $allTasks) {
+            Write-Host "  - $($t.id): owner='$($t.owner)', status='$($t.status)', title='$($t.title)'" -ForegroundColor DarkGray
+        }
+    } else {
+        Write-Host "  (Task board has 0 tasks)" -ForegroundColor DarkGray
+    }
+    Write-Host ""
     exit 0
 } else {
     Write-Host "" 
-    Write-Host "========================================" -ForegroundColor Green
-    Write-Host "  TASK(S) FOUND FOR AGENT: $Agent" -ForegroundColor Green
-    Write-Host "========================================" -ForegroundColor Green
+    Write-Host "==================================================" -ForegroundColor Green
+    Write-Host "  TASK(S) FOUND FOR AGENT: $($Agent.ToUpper())" -ForegroundColor Green
+    Write-Host "==================================================" -ForegroundColor Green
     foreach ($t in $foundTasks) {
         Write-Host ""
-        Write-Host "  ID:     $($t.id)" -ForegroundColor Cyan
-        Write-Host "  TITLE:  $($t.title)" -ForegroundColor Cyan
-        Write-Host "  STATUS: $($t.status)" -ForegroundColor Cyan
+        Write-Host "  TASK ID : $($t.id)" -ForegroundColor Cyan
+        Write-Host "  TITLE   : $($t.title)" -ForegroundColor Cyan
+        Write-Host "  STATUS  : $($t.status)" -ForegroundColor Cyan
+        Write-Host "  OWNER   : $($t.owner)" -ForegroundColor Cyan
+        if ($t.description) {
+            Write-Host "  DESC    : $($t.description)" -ForegroundColor White
+        }
         Write-Host ""
-        Write-Host "  ACTION: Read full task from .ai/task-board.yaml and execute now." -ForegroundColor White
+        Write-Host "  ACTION  : Read full details from .ai/task-board.yaml and execute." -ForegroundColor Yellow
     }
-    Write-Host "========================================" -ForegroundColor Green
-    exit 1  # exit 1 = task found (used by poll loop to trigger action)
+    Write-Host "==================================================" -ForegroundColor Green
+    Write-Host ""
+    exit 1  # exit 1 = task found (triggers poll loop alert)
 }
