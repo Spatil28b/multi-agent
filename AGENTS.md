@@ -1,63 +1,76 @@
-﻿# Autonomous Engineering Team
+﻿# 🤖 Autonomous Multi-Agent Engineering Team
 
-This project uses a multi-agent autonomous engineering workflow managed by the Lead Orchestrator.
+A production-grade, multi-role autonomous software engineering system for Antigravity IDE and Claude Code.
 
-## How to Use
+---
 
-Talk to the Lead agent. Give it plain English requests:
+## 🌟 Two Ways to Use
 
-  Implement X.
-  Fix Y.
-  Improve Z.
-  Run full QA.
-  Audit the project.
-  Prepare for production.
+### ⚡ Mode 1: 100% Autonomous Hands-Free Mode (Recommended)
+Run the entire 7-role engineering team inside **ONE single IDE window** without switching windows or typing "check":
 
-The Lead handles all decomposition, delegation, verification, and reporting.
+```text
+Implement [feature description] using the full autonomous-feature workflow end-to-end.
+```
 
-## Agent Team
+The system autonomously cycles through:
+1. 📐 **Architect** — Analyzes dependencies & designs architecture.
+2. 💻 **Developer** — Implements code & unit tests.
+3. 🕵️ **QA** — Runs adversarial tests & logs edge case bugs.
+4. 🔧 **Bug Fixer** — Repairs defects with regression tests.
+5. 🛡️ **Security Reviewer** — Scans for vulnerabilities & permission leaks.
+6. 📋 **Code Reviewer** — Audits maintainability & cleanliness.
+7. 👑 **Lead Orchestrator** — Verifies builds and delivers the final report.
 
-| Agent | Role |
-|-------|------|
-| lead | Orchestrator. Receives all requests. Coordinates delivery pipeline. |
-| architect | Architecture analysis and implementation planning. |
-| developer | Feature implementation specialist. |
-| qa | Independent quality assurance. Tries to break implementations. |
-| bug-fixer | Bug reproduction, root cause analysis, and targeted fixes. |
-| security-reviewer | Security review of auth, authorization, input, APIs. |
-| code-reviewer | Code review for correctness, maintainability, and test coverage. |
+---
 
-## Workflows
+### 🪟 Mode 2: Multi-Window Isolated Workspace Mode
+For large projects requiring separate directory isolation across multiple windows:
 
-| Workflow | Purpose |
-|----------|---------|
-| autonomous-feature | Full delivery pipeline for medium/large features. |
-| bug-hunt | Structured bug investigation and fix. |
-| full-verify | Complete quality and correctness verification. |
-| security-review | Dedicated security review. |
-| code-review | Dedicated code review. |
+1. **Create separate folders:**
+   ```powershell
+   .\scripts\setup-agent-workspaces.ps1
+   ```
+2. **Start polling monitors:**
+   ```powershell
+   .\scripts\start-all-poll-loops.ps1
+   ```
+3. Open each folder in a separate IDE window (`main-agent`, `sub-agents/architect`, etc.) and paste their activation prompts from `.agents/activation/`.
 
-## Shared State
+---
 
-All agent state is in .ai/:
+## 👥 The Agent Team
 
-  .ai/project-profile.md    - Technology stack facts
-  .ai/project-state.md      - Current status
-  .ai/task-board.yaml       - Active work
-  .ai/architecture.md       - Architecture
-  .ai/project-rules.md      - Rules
-  .ai/agent-protocol.md     - Communication protocol
-  .ai/decisions.md          - Technical decisions
-  .ai/bugs.md               - Known bugs
-  .ai/test-results.md       - Verification history
-  .ai/current-work.md       - Active feature context
+| Agent | Role | Responsibility |
+|---|---|---|
+| **lead** | Orchestrator | Coordinates delivery pipeline & final verification |
+| **architect** | Architecture Specialist | Analyzes system design, interfaces & planning |
+| **developer** | Implementation Specialist | Writes production code & unit tests |
+| **qa** | QA & Adversarial Tester | Breaks implementations & uncovers bugs |
+| **bug-fixer** | Root Cause Repair | Diagnoses & fixes defects with regression tests |
+| **security-reviewer** | Security Auditor | Audits auth, input validation, secrets & APIs |
+| **code-reviewer** | Code Quality Judge | Enforces coding standards, cleanliness & review |
 
-## Agent Files
+---
 
-  .agents/agents/lead.md
-  .agents/agents/architect.md
-  .agents/agents/developer.md
-  .agents/agents/qa.md
-  .agents/agents/bug-fixer.md
-  .agents/agents/security-reviewer.md
-  .agents/agents/code-reviewer.md
+## 📂 Shared Memory (`.ai/`)
+
+All agents coordinate through structured persistent files:
+* `.ai/project-profile.md` — Detected technology stack & constraints
+* `.ai/project-state.md` — High-level team progress
+* `.ai/task-board.yaml` — Active task tracker & dependencies
+* `.ai/architecture.md` — Architectural specifications
+* `.ai/decisions.md` — Architecture Decision Records (ADRs)
+* `.ai/bugs.md` — Bug tracking & root causes
+* `.ai/test-results.md` — Verification test logs
+* `.ai/current-work.md` — Active feature context
+
+---
+
+## 🚀 Workflows (`.agents/workflows/`)
+
+* `/autonomous-feature` — Full end-to-end feature delivery pipeline.
+* `/bug-hunt` — Targeted bug reproduction & fix verification.
+* `/full-verify` — Universal multi-layer test suite execution.
+* `/security-review` — Dedicated security & vulnerability audit.
+* `/code-review` — Final code quality & architectural sign-off.
