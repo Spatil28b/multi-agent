@@ -1,0 +1,28 @@
+﻿# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+*.swp
+
+# Secrets
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# Logs
+logs/
+*.log
+
+# Build output (to be expanded when tech stack is determined)
+dist/
+build/
+__pycache__/
+*.pyc
+node_modules/
+.next/
+target/

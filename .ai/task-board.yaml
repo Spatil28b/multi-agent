@@ -1,0 +1,22 @@
+﻿# Task Board
+# Statuses: backlog | ready | running | blocked | review | testing | failed | completed | cancelled
+
+tasks:
+  TASK-000:
+    title: "Bootstrap autonomous engineering team"
+    description: "Initialize .ai/ shared state, .agents/ agent definitions, and workflows."
+    owner: "lead"
+    status: "completed"
+    priority: "critical"
+    dependencies: []
+    files:
+      - ".ai/"
+      - ".agents/"
+    acceptance:
+      - "All core agent files created"
+      - "All shared state files created"
+      - "All core workflows created"
+    verification:
+      - "Directory structure verified"
+    result: "SUCCESS — bootstrap complete on 2026-08-25"
+    blockers: []
